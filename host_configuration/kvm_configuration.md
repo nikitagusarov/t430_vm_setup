@@ -19,6 +19,18 @@ Or a set recommended on [Debian](https://wiki.debian.org/KVM)
 apt-get install qemu-kvm libvirt-clients libvirt-daemon-system
 ```
 
+Do not forget to update firmware before installation :
+
+```
+sudo apt install firmware-misc-nonfree
+```
+
+If this step was skipped, rebuild `firmware-misc-nonfree` :
+
+```
+sudo update-initramfs -u
+```
+
 First of all we should configure user profile to use `libvirt` :
 
 ```
