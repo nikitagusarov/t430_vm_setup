@@ -55,10 +55,11 @@ menuentry 'Debian' --class debian --class gnu-linux --class gnu --class os $menu
 Copy this entry to our `/etc/grub.d/15_linux_text` file and change `quiet splash $vt_handoff` to `quiet splash text`.
 It is adviced as well to change lines `/boot/vmlinuz...` to `/vmlinuz` symlinc, as well as `/boot/initrd.img...` to `/initrd.img`.
 
-Finally, there is a more advanced solution - to modify the `/etc/grub.d/10_linux file` in order to automatically generate text mode menu entry.
+Theoretically, there is a more advanced solution - to modify the `/etc/grub.d/10_linux file` in order to automatically generate text mode menu entry.
 However, this option requires some knowledges on this file's functionning.
 Probably define some new variable for additional mode in `/etc/defaul/grub` and add a separate menu entry inside `10_linux` using this variable instead of `GRUB_CMDLINE_LINUX_DEFAULT`.
 For example, use `GRUB_CMDLINE_LINUX_ADVANCED`.
+We will use this method while cloning `10_linux` to `15_linux` and modifying it to allow autompletion and adding at the same time another `grub` entry.
 
 After either of this manipulations we should rebuild grub :
 
@@ -171,7 +172,86 @@ For some more insight about living only in terminal see this [blogpost](https://
 
 
 
-### 4. Enable virtual machine autostart on boot
+### 4. Some ideas on text mode and VM's
+
+The ideas hereafter were inspired by [this discussion](https://askubuntu.com/questions/1130535/launch-gui-apps-from-text-mode-tty-without-loading-window-desktop-manager) : 
+
+In the case we do not find a way to initialise VM session on start from inside grub (it should be eventually possible through tweaking with `/etc/defaul/grub` and `/etc/grub.d/10_linux` configs), we should find a solution to start VM Xsession from host's terminal.
+First of all, we shoul install `xterm` :
+
+```
+sudo apt install xterm
+```
+
+The command to start some application in *xterm* window is :
+
+```
+startx application_name
+```
+
+In order to get full screen experience, we may look into [this thread](https://askubuntu.com/questions/822097/startx-not-starting-applications-in-fullscreen) and add required options :
+
+```
+-width 1600 -height 900
+```
+
+or
+
+```
+-geometry 1600x900
+```
+
+Unfortunately, neither of these options worked for me.
+Apparently, as it was discovered later, the xserver adjusts automatically to the resolution of the VM.
+
+```
+sudo virsh start VM_NAME
+sudo startx /usr/bin/remote-viewer spice://localhost:5900
+```
+
+We may seek to further automate this.
+First of all we should create *ini* file (let's say `vm.conf`) which would pass options to `remote-viewer`, with following contents :
+
+```
+[virt-viewer]
+type=spice
+host=localhost
+port=5900
+fullscreen=1
+```
+
+Suppose, that we store this file as `/usr/share/vms/remote-viewer.conf` (we should create the `vms` directory first).
+Then we are going to create a script to automatically create VM and then start remote-viewer session :
+
+```
+#!/bin/bash
+# VM launcher
+# To be run with root priveledges
+
+# Verify arguments and start given by $1 virtual machine
+if [ "$1" = "" ]; then
+
+        echo "No virtual machine name provided, exiting program"
+        exit=1
+
+else
+        virsh start $1
+
+        # wait for initialisation to finish
+        wait
+
+        # Start session with arguments given in x
+        startx /usr/bin/remote-viewer /etc/vms/remote-viewer.conf
+fi
+```
+
+Now we are able to start our virtual machine and immedeately enter a fullscreen session.
+Even as the laptop will be used by single user, we move the executable directly to `/usr/bin` folder.
+*It still rests to find a solution for how to run the VM on login, having separate option for this iin grub or logon screen.*
+
+
+
+### 5. Enable virtual machine autostart on boot
 
 #### Some basics
 
