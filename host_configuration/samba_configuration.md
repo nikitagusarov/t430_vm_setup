@@ -3,7 +3,7 @@
 Install `samba` server essentials :
 
 ```
-sudo apt install samba smb-client cifs-utils
+sudo apt install samba smbclient cifs-utils
 ```
 
 Create shared folder :
@@ -70,7 +70,7 @@ testparm
 Enable `samba` on start 
 
 ```
-sudo systemctl enable samba (or smbd ?)
+sudo systemctl enable smbd
 ```
 
 There are eventually some questions on how should user access the shared folder from host.
