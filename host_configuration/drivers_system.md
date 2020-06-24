@@ -22,6 +22,8 @@ Particularly in this section we are going to setup the following components :
 4. TLP battery management tool
 5. Fan configuration (possibly not essential with BIOS fan management, this entry won't be used)
 
+
+
 ### 1. Minimal *Debian 10* installation
 
 First, we download [Debian](https://www.debian.org/releases/index.fr.html) .iso from official repository (the .iso used was with firmware, but still it was unable to install proprietary wifi and bluetooth drivers).
@@ -35,6 +37,8 @@ Then we install all required packages :
 sudo apt install curl wget git
 ```
 
+
+
 ### 2. Wifi (Intel N2200)
 
 The original ThinkPad T430 wifi requires [proprietary](https://wiki.debian.org/fr/iwlwifi) drivers to run :
@@ -42,6 +46,8 @@ The original ThinkPad T430 wifi requires [proprietary](https://wiki.debian.org/f
 ```
 sudo apt install firmware-iwlwifi
 ```
+
+
 
 ### 3. Bluetooth (Broadcom BCN20702 Bluetooth 4.0)
 
@@ -59,6 +65,8 @@ sudo mkdir /lib/firmware/brcm
 sudo mv fw-0a5c_21e8.hcd /lib/firmware/brcm/BCM20702A0-0a5c-21e6.hcd
 sudo cp /lib/firmware/brcm/BCM20702A0-0a5c-21e6.hcd /lib/firmware/brcm/BCM20702A1-0a5c-21e6.hcd
 ```
+
+
 
 ### 4. TLP battery management tool
 
@@ -115,6 +123,8 @@ cd TLPUI
 python3 setup.py --command-packages=stdeb.command bdist_deb
 sudo dpkg -i deb_dist/python3-tlpui_*all.deb
 ```
+
+
 
 ### 5. Fan configuration (possibly not essential with BIOS fan management, this entry won't be used)
 
@@ -183,7 +193,7 @@ intel_reg write 0xC8254 0x7a107a1 # This is an example for 500 Hz
 The reg values indicated above are not appropriate for *ThinkPad T430*.
 [Here](https://github.com/ThinkPadThink/Thinkpadthinkpad/blob/master/PWM.md) is a guide (eventually in russian) on PWM liquidation. 
 In our case there appears to be a little problem, as in *Debian 10* the package `intel-gpu-tools` (version `1.22-1+b1`) has a bug with reading registers values.
-This bug was fixed in later versions, starting with `1.25-2`.
+This bug was fixed in later versions, starting with `1.25-2` (for more detailes refer to [this bug report](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=918116)).
 
 In the case this operation was successful (ie: using *Ubuntu* instead of *Debian*), we should create a service (ex: `pwmfrequency@.service`) to be run at startup :
 
