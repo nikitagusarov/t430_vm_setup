@@ -158,3 +158,49 @@ Add `thinkfan` to boot :
 ```
 sudo systemctl enable thinkfan.service
 ```
+
+
+
+### 6. Eliminate PWM 
+
+As for now the installed matrix is a stock one HD+ TN pannel, we will inevitably encounter PWM flickering issue.
+On linux this problem is easier to solve than on Windows 10.
+On Intel i915 GPU it may be possible to adjust PWM frequency to eliminate flicker. 
+To manipulate the registers values we should first of all install `intel-gpu-tools`, which may be found [here](https://github.com/mkuoppal/intel-gpu-tools) :
+
+```
+sudo apt install intel-gpu-tools
+```
+
+Full guide to usage of this utility may be found [here](https://devbraindom.blogspot.com/2013/03/eliminate-led-screen-flicker-with-intel.html), it describes as well the procedure of register modification.
+As it [was pointed out](https://bbs.archlinux.org/viewtopic.php?id=202353) the command was modified in later versions :
+
+```
+intel_reg read 0xC6204
+intel_reg write 0xC8254 0x7a107a1 # This is an example for 500 Hz
+```
+
+The reg values indicated above are not appropriate for *ThinkPad T430*.
+[Here](https://github.com/ThinkPadThink/Thinkpadthinkpad/blob/master/PWM.md) is a guide (eventually in russian) on PWM liquidation. 
+In our case there appears to be a little problem, as in *Debian 10* the package `intel-gpu-tools` (version `1.22-1+b1`) has a bug with reading registers values.
+This bug was fixed in later versions, starting with `1.25-2`.
+
+In the case this operation was successful (ie: using *Ubuntu* instead of *Debian*), we should create a service (ex: `pwmfrequency@.service`) to be run at startup :
+
+```
+[Unit]
+Description=LED PWM frequency 
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/intel_reg write 0xC8254 %I  
+
+[Install]
+WantedBy=graphical.target
+```
+
+Then the service should be enabled :
+
+```
+systemctl enable pwmfrequency@0x7a107a1 # Specifying the value giving required frequency
+```
