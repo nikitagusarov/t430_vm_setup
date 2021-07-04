@@ -27,3 +27,5 @@ The idea is to use *Ubuntu 20.04* with all required office and messenger program
 
 The only major disadvantage, apart from some eventual ressources loss (that is not so evident, as general ressources management flexibility becomes much simpler), is inability of *Windows* to reach te BIOS.
 Consecuently, BIOS updates become much more difficult: the Lenovo's update tool becomes unavailable, it becomes impossible to execute [IVprep](https://github.com/n4ru/IVprep), etc.
+
+# GPG test
